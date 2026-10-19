@@ -12,3 +12,4 @@
 #
 # One key per line, for example:
 # ssh-ed25519 AAAA... automation-admin-2026-10
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIC7W+JmL4SxRofCFNXiv5lLxTfJU0a0lhhlIdleyMt3b automation-admin-2026-10
