@@ -1,0 +1,14 @@
+# Public keys allowed to log in as the 'ansible' automation account.
+#
+# This file is the source of truth: running a bootstrap script replaces the
+# account's authorized_keys with exactly the key lines below.
+#
+# PUBLIC REPO RULES (enforced by CI):
+#   - public keys only (ssh-ed25519 / sk-ssh-ed25519@openssh.com)
+#   - neutral comments: a role and date, e.g. "automation-admin-2026-10"
+#     (no names, hostnames, emails or IP addresses)
+#   - no from="..." restrictions here; those contain network details and are
+#     applied later by Ansible from a private repo
+#
+# One key per line, for example:
+# ssh-ed25519 AAAA... automation-admin-2026-10

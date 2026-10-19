@@ -1,0 +1,15 @@
+# Never commit private keys, credentials or environment details
+id_*
+!*.pub
+*.pem
+*.key
+*.p12
+*.pfx
+.env
+.env.*
+*.vault
+inventory*
+host_vars/
+group_vars/
+.ssh/
+.DS_Store

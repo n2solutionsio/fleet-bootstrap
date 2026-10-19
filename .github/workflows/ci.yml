@@ -1,0 +1,49 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Lint scripts
+        run: shellcheck -S warning mac/*.sh linux/*.sh
+
+      - name: Bash syntax
+        run: for f in mac/*.sh linux/*.sh; do bash -n "$f"; done
+
+      - name: authorized_keys holds only plain ed25519 public keys
+        run: |
+          grep -Ev '^[[:space:]]*(#|$)' keys/authorized_keys > /tmp/keys || true
+          n=0
+          while IFS= read -r line; do
+            n=$((n+1))
+            [[ "$line" =~ ^(ssh-ed25519|sk-ssh-ed25519@openssh\.com)[[:space:]] ]] \
+              || { echo "::error file=keys/authorized_keys::line $n must start with the key type (no options such as from=)"; exit 1; }
+            printf '%s\n' "$line" | ssh-keygen -l -f /dev/stdin >/dev/null \
+              || { echo "::error file=keys/authorized_keys::line $n is not a valid public key"; exit 1; }
+          done < /tmp/keys
+          echo "$n key(s) OK"
+
+      - name: No private keys or private network details
+        run: |
+          fail=0
+          if grep -rIn --exclude-dir=.git -E 'BEGIN [A-Z ]*PRIVATE KEY' .; then
+            echo "::error::private key material found"; fail=1
+          fi
+          # RFC 1918 addresses; documentation ranges (192.0.2.x etc.) are allowed
+          if grep -rInE --exclude-dir=.git \
+               '(^|[^0-9.])(10\.[0-9]{1,3}|172\.(1[6-9]|2[0-9]|3[01])|192\.168)\.[0-9]{1,3}\.[0-9]{1,3}([^0-9]|$)' .; then
+            echo "::error::private IP address found"; fail=1
+          fi
+          exit $fail
